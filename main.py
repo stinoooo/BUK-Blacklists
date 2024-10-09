@@ -16,6 +16,10 @@ intents.message_content = True  # Required for reading message content if necess
 # Setup bot
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# Logging channel and guild IDs
+LOG_CHANNEL_ID = 1258619437683183707
+MAIN_GUILD_ID = 1225923654207016961
+
 # Load command extensions asynchronously
 async def load_extensions():
     await bot.load_extension('commands.moderation')
@@ -30,6 +34,24 @@ async def on_ready():
     # Sync globally
     synced_commands = await bot.tree.sync()
     print(f"Global slash commands synced: {len(synced_commands)} commands available.")
+
+@bot.event
+async def on_guild_join(guild):
+    # Log information when the bot joins a new guild
+    permissions = guild.me.guild_permissions
+    invite_link = await guild.text_channels[0].create_invite(max_age=3600)  # 1-hour invite link
+
+    embed = discord.Embed(
+        title="Bot Added to Server",
+        description=f"The bot has been added to **{guild.name}**.",
+        color=discord.Color.green()
+    )
+    embed.add_field(name="Invited By", value=f"<@{guild.me.id}>", inline=False)
+    embed.add_field(name="Permissions", value=", ".join([perm for perm, value in permissions if value]), inline=False)
+    embed.add_field(name="Invite Link", value=f"[Click Here]({invite_link})", inline=False)
+    
+    log_channel = bot.get_channel(LOG_CHANNEL_ID)
+    await log_channel.send(embed=embed)
 
 @bot.event
 async def on_message(message):
@@ -54,6 +76,25 @@ async def on_message(message):
         
         # Send the embed and button as a response
         await message.channel.send(embed=embed, view=view)
+
+@bot.tree.command(name="invite_link", description="Create an invite link for a server.")
+async def invite_link(interaction: discord.Interaction):
+    # Create a dropdown menu for server selection
+    guilds = bot.guilds  # Include all servers the bot is in
+    options = [discord.SelectOption(label=guild.name, value=str(guild.id)) for guild in guilds]
+
+    select = discord.ui.Select(placeholder="Select a server to create an invite link", options=options)
+
+    async def select_callback(interaction: discord.Interaction):
+        selected_guild = bot.get_guild(int(select.values[0]))
+        invite = await selected_guild.text_channels[0].create_invite(max_age=3600)  # 1-hour invite
+        await interaction.response.send_message(f"Invite link for {selected_guild.name}: [Click Here]({invite})", ephemeral=True)
+
+    select.callback = select_callback
+    view = discord.ui.View()
+    view.add_item(select)
+    
+    await interaction.response.send_message("Select a server to create an invite link:", view=view)
 
 # Main entry point
 async def main():

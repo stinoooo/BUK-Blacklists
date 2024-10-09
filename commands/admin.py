@@ -88,5 +88,25 @@ class Admin(commands.Cog):
         view.add_item(select)
         await interaction.response.send_message("Please select a server to ban from:", view=view)
 
+    @app_commands.command(name="invite_link", description="Create an invite link for a server.")
+    @is_admin_team()
+    async def invite_link(self, interaction: discord.Interaction):
+        # Create a dropdown menu for server selection
+        guilds = self.bot.guilds  # Include all servers the bot is in
+        options = [discord.SelectOption(label=guild.name, value=str(guild.id)) for guild in guilds]
+
+        select = discord.ui.Select(placeholder="Select a server to create an invite link", options=options)
+
+        async def select_callback(interaction: discord.Interaction):
+            selected_guild = self.bot.get_guild(int(select.values[0]))
+            invite = await selected_guild.text_channels[0].create_invite(max_age=3600)  # 1-hour invite
+            await interaction.response.send_message(f"Invite link for {selected_guild.name}: [Click Here]({invite})", ephemeral=True)
+
+        select.callback = select_callback
+        view = discord.ui.View()
+        view.add_item(select)
+
+        await interaction.response.send_message("Select a server to create an invite link:", view=view)
+
 async def setup(bot: commands.Bot):
     await bot.add_cog(Admin(bot))
