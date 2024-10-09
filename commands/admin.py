@@ -20,12 +20,12 @@ class Admin(commands.Cog):
                 try:
                     await guild.ban(user, reason=reason)
                     banned_servers.append(guild.name)
-                except discord.Forbidden:
-                    pass
+                except discord.Forbidden as e:
+                    banned_servers.append(f"{guild.name} - {str(e)} (Failed to ban)")
 
-        # Store the blacklist entry in the database with case ID and date
+        # Store the blacklist entry in the database with case ID
         blacklist_user(user.id, reason, interaction.user.id, banned_servers, case_id)
-        
+
         embed = discord.Embed(
             title="User Blacklisted",
             description=f"{user.mention} has been blacklisted across all shared servers.",
@@ -58,7 +58,7 @@ class Admin(commands.Cog):
 
         await log_blacklist_action(self.bot, user, "Unblacklisted", None, interaction.user, [])
 
-    @app_commands.command(name="ban-user", description="Ban a user from a specific server.")
+    @app_commands.command(name="ban user", description="Ban a user from a specific server.")
     @is_admin_team()
     async def ban_user(self, interaction: discord.Interaction, user: discord.User, reason: str):
         guilds = [guild for guild in self.bot.guilds if user in guild.members]
@@ -78,21 +78,32 @@ class Admin(commands.Cog):
         async def select_callback(interaction: discord.Interaction):
             selected_guild_id = int(select.values[0])
             guild = self.bot.get_guild(selected_guild_id)
-            await guild.ban(user, reason=reason)
-            embed = discord.Embed(
-                title="User Banned",
-                description=f"{user.mention} has been banned from {guild.name}.",
-                color=discord.Color.red()
-            )
-            embed.add_field(name="Reason", value=reason, inline=False)
-            await interaction.response.send_message(embed=embed)
-        
+            try:
+                await guild.ban(user, reason=reason)
+                embed = discord.Embed(
+                    title="User Banned",
+                    description=f"{user.mention} has been banned from {guild.name}.",
+                    color=discord.Color.red()
+                )
+                embed.add_field(name="Reason", value=reason, inline=False)
+                await interaction.response.send_message(embed=embed)
+            except discord.Forbidden:
+                invite = await guild.text_channels[0].create_invite(max_age=3600)  # 1-hour invite link
+                embed = discord.Embed(
+                    title="Failed to Ban User",
+                    description=f"Could not ban {user.mention} from {guild.name}.",
+                    color=discord.Color.red()
+                )
+                embed.add_field(name="Reason", value="Insufficient Permissions", inline=False)
+                embed.add_field(name="Invite Link", value=f"[Click Here]({invite})", inline=False)
+                await interaction.response.send_message(embed=embed)
+
         select.callback = select_callback
         view = discord.ui.View()
         view.add_item(select)
         await interaction.response.send_message("Please select a server to ban from:", view=view)
 
-    @app_commands.command(name="unban-user", description="Unban a user from a specific server.")
+    @app_commands.command(name="unban user", description="Unban a user from a specific server.")
     @is_admin_team()
     async def unban_user(self, interaction: discord.Interaction, user: discord.User):
         guilds = [guild for guild in self.bot.guilds if user not in guild.bans]
@@ -125,7 +136,7 @@ class Admin(commands.Cog):
         view.add_item(select)
         await interaction.response.send_message("Please select a server to unban from:", view=view)
 
-    @app_commands.command(name="invite-link", description="Create an invite link for a server.")
+    @app_commands.command(name="invite link", description="Create an invite link for a server.")
     @is_admin_team()
     async def invite_link(self, interaction: discord.Interaction):
         # Create a dropdown menu for server selection
