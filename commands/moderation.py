@@ -2,7 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from utils.checks import is_moderation_or_admin
-from utils.database import fetch_blacklist_status, edit_blacklist_reason  # Ensure edit function is defined
+from utils.database import fetch_blacklist_status, edit_blacklist_reason
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -11,6 +11,7 @@ class Moderation(commands.Cog):
     @app_commands.command(name="check-status", description="Check if a user is blacklisted.")
     @app_commands.check(is_moderation_or_admin)  # Check for moderation or admin roles
     async def check_status(self, interaction: discord.Interaction, user: discord.User):
+        # Fetch blacklist record by user ID
         blacklist_record = fetch_blacklist_status(user.id)
 
         if blacklist_record:

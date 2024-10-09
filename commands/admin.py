@@ -12,6 +12,7 @@ class Admin(commands.Cog):
 
     @app_commands.command(name="blacklist", description="Blacklist a user across all shared servers.")
     @is_admin_team()
+    @is_admin_team()
     async def blacklist(self, interaction: discord.Interaction, user: discord.User, reason: str):
         banned_servers = []
         case_id = random.randint(10000, 99999)  # Generate a unique case ID
@@ -23,10 +24,14 @@ class Admin(commands.Cog):
             color=discord.Color(0x013a93)
         )
         dm_embed.set_footer(text="Appeal by clicking the button below.")
-        
+
         # Create a button for the appeal link
         appeal_button = discord.ui.Button(label="BUK Moderation & Appeals", url="https://discord.gg/DXVCBDwutA", style=discord.ButtonStyle.link)
 
+        # Store the blacklist entry in the database with case ID
+        blacklist_user(user.id, user.name, reason, interaction.user.id, banned_servers, case_id)  # Include username here
+
+        # Ban the user from all servers (excluding appeals server)
         for guild in self.bot.guilds:
             if guild.id != 1236376514430500914:  # Exclude the appeals server
                 try:
@@ -40,9 +45,6 @@ class Admin(commands.Cog):
             await user.send(embed=dm_embed, view=discord.ui.View().add_item(appeal_button))
         except discord.Forbidden:
             print(f"Could not send DM to {user.mention}, they may have DMs disabled.")
-
-        # Store the blacklist entry in the database with case ID
-        blacklist_user(user.id, reason, interaction.user.id, banned_servers, case_id)
 
         # Log the action
         log_embed = discord.Embed(
