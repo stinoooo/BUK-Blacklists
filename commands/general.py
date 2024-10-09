@@ -12,7 +12,7 @@ COMMAND_IDS = {
     "check-status": "1293580200172458122",
     "lookup-user": "1293580200172458123",
     "edit-reason": "1293580200172458124",
-    "eval": "1293585487239581705",
+    "eval": "1293544631858102385",
     "sudo": "1293544631858102386",
     "reload": "1293552354481803350",
     "kick-user": "1293580200172458128",
@@ -105,7 +105,12 @@ class General(commands.Cog):
         }
 
         # Check user's roles and add relevant commands to the embed
-        if any(role.id in [MOD_TEAM_1, MOD_TEAM_2] for role in interaction.user.roles):
+        is_moderation = any(role.id in [MOD_TEAM_1, MOD_TEAM_2] for role in interaction.user.roles)
+        is_admin = any(role.id in [ADMIN_TEAM_1, ADMIN_TEAM_2] for role in interaction.user.roles)
+        is_bot_dev = interaction.user.id == DEV_USER_ID
+
+        # Show moderation commands to moderation team
+        if is_moderation:
             embed.add_field(
                 name="Moderation Commands",
                 value="\n".join(
@@ -114,7 +119,8 @@ class General(commands.Cog):
                 inline=False
             )
 
-        if any(role.id in [ADMIN_TEAM_1, ADMIN_TEAM_2] for role in interaction.user.roles):
+        # Show admin commands to admin team
+        if is_admin:
             embed.add_field(
                 name="Admin Commands",
                 value="\n".join(
@@ -123,7 +129,8 @@ class General(commands.Cog):
                 inline=False
             )
 
-        if interaction.user.id == DEV_USER_ID:  # Assuming DEV_USER_ID is defined elsewhere
+        # Show bot developer commands to bot developers
+        if is_bot_dev:
             embed.add_field(
                 name="Bot Developer Commands",
                 value="\n".join(
@@ -131,6 +138,13 @@ class General(commands.Cog):
                 ),
                 inline=False
             )
+
+        # All roles can see the help command
+        embed.add_field(
+            name="General Commands",
+            value="Use /help to see available commands.",
+            inline=False
+        )
 
         await interaction.response.send_message(embed=embed)
 
