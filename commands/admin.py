@@ -11,8 +11,7 @@ class Admin(commands.Cog):
 
     @app_commands.command(name="blacklist", description="Blacklist a user across all shared servers.")
     @is_admin_team()
-    async def blacklist(self, interaction: discord.Interaction, user: discord.User, reason: str, additional_info: str = None):
-        # Ban user from all servers except the appeals server
+    async def blacklist(self, interaction: discord.Interaction, user: discord.User, reason: str):
         banned_servers = []
         for guild in self.bot.guilds:
             if guild.id != 1236376514430500914:  # Exclude the appeals server
@@ -22,10 +21,8 @@ class Admin(commands.Cog):
                 except discord.Forbidden:
                     pass
 
-        # Save blacklist data in MongoDB
         blacklist_user(user.id, reason, interaction.user.id, banned_servers)
-
-        # Create the embed for confirmation
+        
         embed = discord.Embed(
             title="User Blacklisted",
             description=f"{user.mention} has been blacklisted across all shared servers.",
@@ -33,36 +30,63 @@ class Admin(commands.Cog):
         )
         embed.add_field(name="Reason", value=reason, inline=False)
         embed.add_field(name="Banned Servers", value=", ".join(banned_servers), inline=False)
-        embed.set_thumbnail(url="https://media.discordapp.net/attachments/689530498837381210/1281538937021661254/image.png")
         await interaction.response.send_message(embed=embed)
 
-        # Log the blacklist action in the specified channel
-        await log_blacklist_action(self.bot, user, reason, additional_info, interaction.user, banned_servers)
+        await log_blacklist_action(self.bot, user, reason, None, interaction.user, banned_servers)
 
     @app_commands.command(name="unblacklist", description="Unblacklist a user.")
     @is_admin_team()
     async def unblacklist(self, interaction: discord.Interaction, user: discord.User):
-        # Unban user from all servers
         for guild in self.bot.guilds:
             try:
                 await guild.unban(user)
             except discord.NotFound:
                 pass
 
-        # Remove blacklist entry from MongoDB
         unblacklist_user(user.id)
 
-        # Create the embed for confirmation
         embed = discord.Embed(
             title="User Unblacklisted",
             description=f"{user.mention} has been unblacklisted from all servers.",
             color=discord.Color.green()
         )
-        embed.set_thumbnail(url="https://media.discordapp.net/attachments/689530498837381210/1281538937021661254/image.png")
         await interaction.response.send_message(embed=embed)
 
-        # Log the unblacklist action in the specified channel
         await log_blacklist_action(self.bot, user, "Unblacklisted", None, interaction.user, [])
+
+    @app_commands.command(name="ban_user", description="Ban a user from a specific server.")
+    @is_admin_team()
+    async def ban_user(self, interaction: discord.Interaction, user: discord.User, reason: str):
+        guilds = [guild for guild in self.bot.guilds if user in guild.members]
+        
+        if not guilds:
+            await interaction.response.send_message("User not found in any shared servers.", ephemeral=True)
+            return
+        
+        # Create a dropdown menu to select a server
+        options = [
+            discord.SelectOption(label=guild.name, value=str(guild.id), description=f"Ban from {guild.name}", emoji=guild.icon.url)
+            for guild in guilds
+        ]
+        
+        select = discord.ui.Select(placeholder="Select a server to ban from", options=options)
+        
+        async def select_callback(interaction: discord.Interaction):
+            selected_guild_id = int(select.values[0])
+            guild = self.bot.get_guild(selected_guild_id)
+            await guild.ban(user, reason=reason)
+            embed = discord.Embed(
+                title="User Banned",
+                description=f"{user.mention} has been banned from {guild.name}.",
+                color=discord.Color.red()
+            )
+            embed.add_field(name="Reason", value=reason, inline=False)
+            await interaction.response.send_message(embed=embed)
+        
+        select.callback = select_callback
+        view = discord.ui.View()
+        view.add_item(select)
+        await interaction.response.send_message("Please select a server to ban from:", view=view)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Admin(bot))
