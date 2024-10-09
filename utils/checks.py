@@ -38,7 +38,6 @@ def is_bot_developer():
         return interaction.user.id == DEV_USER_ID  # Check if user is the bot developer
     return app_commands.check(predicate)
 
-# New check for moderation or admin team
 def is_moderation_or_admin():
     async def predicate(interaction: discord.Interaction):
         if interaction.user.id == DEV_USER_ID:  # Allow bot developer to bypass this check
