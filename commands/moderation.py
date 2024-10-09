@@ -5,11 +5,11 @@ from utils.checks import is_moderation_or_admin
 from utils.database import fetch_blacklist_status, edit_blacklist_reason
 
 class Moderation(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @app_commands.command(name="check-status", description="Check if a user is blacklisted.")
-    @app_commands.check(is_moderation_or_admin)  # Check for moderation or admin roles
+    @app_commands.check(is_moderation_or_admin)
     async def check_status(self, interaction: discord.Interaction, user: discord.User):
         # Fetch blacklist record by user ID
         blacklist_record = fetch_blacklist_status(user.id)
@@ -23,8 +23,8 @@ class Moderation(commands.Cog):
             embed.add_field(name="Reason", value=blacklist_record['reason'], inline=False)
             embed.add_field(name="Blacklisted By", value=f"<@{blacklist_record['blacklisted_by']}>", inline=False)
             embed.add_field(name="Banned Servers", value=", ".join(blacklist_record['banned_servers']), inline=False)
-            embed.add_field(name="Case ID", value=blacklist_record['case_id'], inline=False)  # Include case ID
-            embed.add_field(name="Date", value=blacklist_record['date_blacklisted'].strftime("%Y-%m-%d %H:%M:%S"), inline=False)  # Include date
+            embed.add_field(name="Case ID", value=blacklist_record['case_id'], inline=False)
+            embed.add_field(name="Date", value=blacklist_record['date_blacklisted'].strftime("%Y-%m-%d %H:%M:%S"), inline=False)
             embed.set_thumbnail(url="https://media.discordapp.net/attachments/689530498837381210/1281538937021661254/image.png")
             await interaction.response.send_message(embed=embed)
         else:
@@ -60,9 +60,9 @@ class Moderation(commands.Cog):
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="edit-reason", description="Edit the reason for a blacklist case.")
-    @app_commands.check(is_moderation_or_admin)  # Check for moderation or admin roles
+    @app_commands.check(is_moderation_or_admin)
     async def edit_reason(self, interaction: discord.Interaction, case_id: int, new_reason: str):
-        success = edit_blacklist_reason(case_id, new_reason)  # Ensure this function updates the reason in the database
+        success = edit_blacklist_reason(case_id, new_reason)
         if success:
             embed = discord.Embed(
                 title="Edit Reason",

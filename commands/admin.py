@@ -12,7 +12,6 @@ class Admin(commands.Cog):
 
     @app_commands.command(name="blacklist", description="Blacklist a user across all shared servers.")
     @is_admin_team()
-    @is_admin_team()
     async def blacklist(self, interaction: discord.Interaction, user: discord.User, reason: str):
         banned_servers = []
         case_id = random.randint(10000, 99999)  # Generate a unique case ID
@@ -24,7 +23,7 @@ class Admin(commands.Cog):
             color=discord.Color(0x013a93)
         )
         dm_embed.set_footer(text="Appeal by clicking the button below.")
-
+        
         # Create a button for the appeal link
         appeal_button = discord.ui.Button(label="BUK Moderation & Appeals", url="https://discord.gg/DXVCBDwutA", style=discord.ButtonStyle.link)
 
@@ -62,11 +61,17 @@ class Admin(commands.Cog):
     @app_commands.command(name="unblacklist", description="Unblacklist a user.")
     @is_admin_team()
     async def unblacklist(self, interaction: discord.Interaction, user: discord.User):
-        for guild in self.bot.guilds:
+        guilds = [guild for guild in self.bot.guilds if user in guild.bans]  # Check if user is banned in any guild
+
+        if not guilds:
+            await interaction.response.send_message("User not found in any shared servers.", ephemeral=True)
+            return
+
+        for guild in guilds:
             try:
                 await guild.unban(user)
             except discord.NotFound:
-                pass
+                continue  # Ignore if user not found in this guild
 
         unblacklist_user(user.id)
 
