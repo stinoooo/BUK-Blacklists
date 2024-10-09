@@ -26,9 +26,17 @@ async def load_extensions():
 async def on_ready():
     print(f'{bot.user} is online!')
     await bot.change_presence(activity=discord.Game(name="Managing Blacklists"))
-    # Sync slash commands for all guilds
-    for guild in bot.guilds:
-        await bot.tree.sync(guild=guild)
+
+    # Sync slash commands for a specific guild for faster testing
+    guild_id = os.getenv('GUILD_ID')  # Set the GUILD_ID in your .env file for testing
+    if guild_id:
+        guild = discord.Object(id=int(guild_id))
+        synced = await bot.tree.sync(guild=guild)
+        print(f"Synced {len(synced)} slash commands to guild {guild_id}.")
+    else:
+        # Global sync if no GUILD_ID is provided
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} slash commands globally.")
 
 # Main entry point
 async def main():
