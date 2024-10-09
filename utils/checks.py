@@ -42,10 +42,10 @@ def is_moderation_or_admin():
     async def predicate(interaction: discord.Interaction):
         if interaction.user.id == DEV_USER_ID:  # Allow bot developer to bypass this check
             return True
-        if interaction.guild.id == 1225923654207016961:
+        if interaction.guild.id == 1225923654207016961:  # Guild 1
             return (MOD_TEAM_1 in [role.id for role in interaction.user.roles] or 
                     ADMIN_TEAM_1 in [role.id for role in interaction.user.roles])
-        elif interaction.guild.id == 1236376514430500914:
+        elif interaction.guild.id == 1236376514430500914:  # Guild 2
             return (MOD_TEAM_2 in [role.id for role in interaction.user.roles] or 
                     ADMIN_TEAM_2 in [role.id for role in interaction.user.roles])
         return False
