@@ -104,13 +104,18 @@ async def on_command(ctx):
 async def on_command_error(ctx, error):
     """Logs errors related to commands."""
     logger.error(f"Error in command {ctx.command}: {error}")
-    await send_log(f"Error in command **{ctx.command}**: {error}")
+    
+    # Check if the error is sensitive
+    if isinstance(error, discord.NotFound) or "missing permissions" in str(error).lower():
+        await send_log(f"Error in command **{ctx.command}**: An issue occurred. Please check the console for details.")
+    else:
+        await send_log(f"Error in command **{ctx.command}**: {error}")
 
 @bot.event
 async def on_error(event, *args, **kwargs):
     """Logs errors that occur outside of commands."""
     logger.error(f"An error occurred in event {event}: {args}, {kwargs}")
-    await send_log(f"An error occurred in event **{event}**: {args}, {kwargs}")
+    await send_log(f"An error occurred in event **{event}**: Please check the console for details.")
 
 # Main entry point
 async def main():
