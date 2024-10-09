@@ -28,5 +28,5 @@ class Moderation(commands.Cog):
         else:
             await interaction.response.send_message(f"{user.mention} is not blacklisted.", ephemeral=True)
 
-async def setup(bot):
+async def setup(bot: commands.Bot):
     await bot.add_cog(Moderation(bot))
