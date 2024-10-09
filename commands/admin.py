@@ -15,6 +15,18 @@ class Admin(commands.Cog):
     async def blacklist(self, interaction: discord.Interaction, user: discord.User, reason: str):
         banned_servers = []
         case_id = random.randint(10000, 99999)  # Generate a unique case ID
+
+        # Prepare the DM to send to the user
+        dm_embed = discord.Embed(
+            title="You Have Been Blacklisted",
+            description=f"You have been blacklisted from BUK.\n\n**Reason:** {reason}\nIf you wish to appeal this decision, please click the button below.",
+            color=discord.Color(0x013a93)
+        )
+        dm_embed.set_footer(text="Appeal by clicking the button below.")
+        
+        # Create a button for the appeal link
+        appeal_button = discord.ui.Button(label="BUK Moderation & Appeals", url="https://discord.gg/DXVCBDwutA", style=discord.ButtonStyle.link)
+
         for guild in self.bot.guilds:
             if guild.id != 1236376514430500914:  # Exclude the appeals server
                 try:
@@ -23,19 +35,26 @@ class Admin(commands.Cog):
                 except discord.Forbidden as e:
                     banned_servers.append(f"{guild.name} - {str(e)} (Failed to ban)")
 
+        # Send the DM to the user
+        try:
+            await user.send(embed=dm_embed, view=discord.ui.View().add_item(appeal_button))
+        except discord.Forbidden:
+            print(f"Could not send DM to {user.mention}, they may have DMs disabled.")
+
         # Store the blacklist entry in the database with case ID
         blacklist_user(user.id, reason, interaction.user.id, banned_servers, case_id)
 
-        embed = discord.Embed(
-            title="User Blacklisted Successfully",
+        # Log the action
+        log_embed = discord.Embed(
+            title="User Blacklisted",
             description=f"{user.mention} has been blacklisted across the following servers:",
             color=discord.Color(0x013a93)
         )
-        embed.add_field(name="Case ID", value=case_id, inline=False)  # Show case ID
-        embed.add_field(name="Reason", value=reason, inline=False)
-        embed.add_field(name="Banned Servers", value=", ".join(banned_servers), inline=False)
-        await interaction.response.send_message(embed=embed)
+        log_embed.add_field(name="Case ID", value=case_id, inline=False)
+        log_embed.add_field(name="Reason", value=reason, inline=False)
+        log_embed.add_field(name="Banned Servers", value=", ".join(banned_servers), inline=False)
 
+        await interaction.response.send_message(embed=log_embed)
         await log_blacklist_action(self.bot, user, reason, None, interaction.user, banned_servers)
 
     @app_commands.command(name="unblacklist", description="Unblacklist a user.")
