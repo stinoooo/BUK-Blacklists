@@ -25,7 +25,7 @@ COMMAND_IDS = {
 MOD_TEAM_1 = 1236358475827904664  # Replace with actual ID
 MOD_TEAM_2 = 1236379144141541489  # Replace with actual ID
 ADMIN_TEAM_1 = 1225934070794555455  # Replace with actual ID
-ADMIN_TEAM_2 = 1225934070794555455  # Replace with actual ID
+ADMIN_TEAM_2 = 1236379225565433927  # Replace with actual ID
 DEV_USER_ID = 186117507554344960  # Bot developer's user ID
 
 class General(commands.Cog):
@@ -40,7 +40,7 @@ class General(commands.Cog):
         )
 
         commands_list = {
-            "Admin Commands": [
+            "Administration Team Commands": [
                 {
                     "name": f"</blacklist:{COMMAND_IDS['blacklist']}>",
                     "description": "Blacklist a user across all shared servers."
@@ -62,7 +62,7 @@ class General(commands.Cog):
                     "description": "Create an invite link for a server."
                 },
             ],
-            "Moderation Commands": [
+            "Moderation Team Commands": [
                 {
                     "name": f"</check-status:{COMMAND_IDS['check-status']}>",
                     "description": "Check if a user is blacklisted."
@@ -104,33 +104,26 @@ class General(commands.Cog):
             ],
         }
 
-        # Check user's roles and add relevant commands to the embed
-        is_moderation = any(role.id in [MOD_TEAM_1, MOD_TEAM_2] for role in interaction.user.roles)
-        is_admin = any(role.id in [ADMIN_TEAM_1, ADMIN_TEAM_2] for role in interaction.user.roles)
-        is_bot_dev = interaction.user.id == DEV_USER_ID
-
-        # Show moderation commands to moderation team
-        if is_moderation:
+ # Check user's roles and add relevant commands to the embed
+        if any(role.id in [MOD_TEAM_1, MOD_TEAM_2, DEV_USER_ID] for role in interaction.user.roles):
             embed.add_field(
-                name="Moderation Commands",
+                name="Moderation Team Commands",
                 value="\n".join(
                     [f"{cmd['name']} - {cmd['description']}" for cmd in commands_list["Moderation Commands"]]
                 ),
                 inline=False
             )
 
-        # Show admin commands to admin team
-        if is_admin:
+        if any(role.id in [ADMIN_TEAM_1, ADMIN_TEAM_2, DEV_USER_ID] for role in interaction.user.roles):
             embed.add_field(
-                name="Admin Commands",
+                name="Administration Team Commands",
                 value="\n".join(
                     [f"{cmd['name']} - {cmd['description']}" for cmd in commands_list["Admin Commands"]]
                 ),
                 inline=False
             )
 
-        # Show bot developer commands to bot developers
-        if is_bot_dev:
+        if interaction.user.id == DEV_USER_ID:  # Check if the user is a bot developer
             embed.add_field(
                 name="Bot Developer Commands",
                 value="\n".join(
@@ -138,13 +131,6 @@ class General(commands.Cog):
                 ),
                 inline=False
             )
-
-        # All roles can see the help command
-        embed.add_field(
-            name="General Commands",
-            value="Use /help to see available commands.",
-            inline=False
-        )
 
         await interaction.response.send_message(embed=embed)
 
