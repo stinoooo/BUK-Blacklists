@@ -105,7 +105,9 @@ class General(commands.Cog):
         }
 
         # Check user's roles and add relevant commands to the embed
-        if any(role.id in [MOD_TEAM_1, MOD_TEAM_2, DEV_USER_ID] for role in interaction.user.roles):
+        user_roles = [role.id for role in interaction.user.roles]  # Get user roles
+
+        if any(role in [MOD_TEAM_1, MOD_TEAM_2, DEV_USER_ID] for role in user_roles):
             embed.add_field(
                 name="Moderation Team Commands",
                 value="\n".join(
@@ -114,7 +116,7 @@ class General(commands.Cog):
                 inline=False
             )
 
-        if any(role.id in [ADMIN_TEAM_1, ADMIN_TEAM_2, DEV_USER_ID] for role in interaction.user.roles):
+        if any(role in [ADMIN_TEAM_1, ADMIN_TEAM_2, DEV_USER_ID] for role in user_roles):
             embed.add_field(
                 name="Administration Team Commands",
                 value="\n".join(

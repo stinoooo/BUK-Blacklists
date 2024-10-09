@@ -31,9 +31,21 @@ class Developer(commands.Cog):
     @app_commands.command(name="sudo", description="Execute commands as another user.")
     @is_bot_developer()
     async def sudo(self, interaction: discord.Interaction, user: discord.User, command: str):
+        # Attempt to find the command by name
+        cmd = self.bot.get_command(command)
+        if cmd is None:
+            await interaction.response.send_message("Command not found.", ephemeral=True)
+            return
+        
+        # Create a fake context for the command
         fake_ctx = await self.bot.get_context(interaction)
         fake_ctx.author = user
-        await self.bot.process_commands(fake_ctx)
+        
+        try:
+            await cmd.invoke(fake_ctx)  # Call the command using the fake context
+            await interaction.response.send_message(f"Executed command '{command}' as {user.mention}.", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"Failed to execute command: {e}", ephemeral=True)
 
     @app_commands.command(name="reload", description="Reloads the bot for maintenance or updates.")
     @is_bot_developer()
