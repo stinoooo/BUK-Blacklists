@@ -24,11 +24,14 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # Logging channel ID
 LOG_CHANNEL_ID = 1293589581643386881
 
-async def send_log(message: str):
-    """Sends log messages to the specified log channel."""
+async def send_log(message):
+    """Sends log messages to the specified log channel. Can handle both strings and embeds."""
     log_channel = bot.get_channel(LOG_CHANNEL_ID)
     if log_channel:
-        await log_channel.send(message)
+        if isinstance(message, discord.Embed):
+            await log_channel.send(embed=message)
+        else:
+            await log_channel.send(message)
     else:
         logger.error("Log channel not found.")
 
@@ -69,7 +72,7 @@ async def on_guild_join(guild):
     embed.add_field(name="Permissions", value=", ".join([perm for perm, value in permissions if value]), inline=False)
     embed.add_field(name="Invite Link", value=f"[Click Here]({invite_link})", inline=False)
 
-    await send_log(embed)
+    await send_log(embed)  # Send embed to log channel
 
 @bot.event
 async def on_message(message):
