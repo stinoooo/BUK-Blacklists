@@ -29,7 +29,7 @@ class Developer(commands.Cog):
         await interaction.response.send_message("Reloading bot...", ephemeral=True)
         os.execv(sys.executable, ['python'] + sys.argv)
 
-    @app_commands.command(name="kick user", description="Kick a user from all servers (excluding appeals server).")
+    @app_commands.command(name="kick-user", description="Kick a user from all servers (excluding appeals server).")
     @is_bot_developer()
     async def kick_user(self, interaction: discord.Interaction, user: discord.User):
         kicked_servers = []

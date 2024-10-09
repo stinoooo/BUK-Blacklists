@@ -58,7 +58,7 @@ class Admin(commands.Cog):
 
         await log_blacklist_action(self.bot, user, "Unblacklisted", None, interaction.user, [])
 
-    @app_commands.command(name="ban user", description="Ban a user from a specific server.")
+    @app_commands.command(name="ban-user", description="Ban a user from a specific server.")
     @is_admin_team()
     async def ban_user(self, interaction: discord.Interaction, user: discord.User, reason: str):
         guilds = [guild for guild in self.bot.guilds if user in guild.members]
@@ -103,7 +103,7 @@ class Admin(commands.Cog):
         view.add_item(select)
         await interaction.response.send_message("Please select a server to ban from:", view=view)
 
-    @app_commands.command(name="unban user", description="Unban a user from a specific server.")
+    @app_commands.command(name="unban-user", description="Unban a user from a specific server.")
     @is_admin_team()
     async def unban_user(self, interaction: discord.Interaction, user: discord.User):
         guilds = [guild for guild in self.bot.guilds if user not in guild.bans]
@@ -136,7 +136,7 @@ class Admin(commands.Cog):
         view.add_item(select)
         await interaction.response.send_message("Please select a server to unban from:", view=view)
 
-    @app_commands.command(name="invite link", description="Create an invite link for a server.")
+    @app_commands.command(name="invite-link", description="Create an invite link for a server.")
     @is_admin_team()
     async def invite_link(self, interaction: discord.Interaction):
         # Create a dropdown menu for server selection
