@@ -21,6 +21,13 @@ COMMAND_IDS = {
     "help": "1293594584840011828",
 }
 
+# Define or import the role IDs at the top of your file
+MOD_TEAM_1 = 1236358475827904664  # Replace with actual ID
+MOD_TEAM_2 = 1236379144141541489  # Replace with actual ID
+ADMIN_TEAM_1 = 1225934070794555455  # Replace with actual ID
+ADMIN_TEAM_2 = 1225934070794555455  # Replace with actual ID
+DEV_USER_ID = 186117507554344960  # Bot developer's user ID
+
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
