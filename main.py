@@ -16,9 +16,10 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Load command extensions asynchronously
 async def load_extensions():
-    await bot.load_extension('bot.commands.moderation')
-    await bot.load_extension('bot.commands.admin')
-    await bot.load_extension('bot.commands.developer')
+    await bot.load_extension('commands.moderation')  # Update the path
+    await bot.load_extension('commands.admin')       # Update the path
+    await bot.load_extension('commands.developer')   # Update the path
+
 
 @bot.event
 async def on_ready():
