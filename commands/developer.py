@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from utils.checks import is_bot_developer
+import os
+import sys  # Ensure sys is imported for the reload functionality
 
 class Developer(commands.Cog):
     def __init__(self, bot):
@@ -12,9 +14,19 @@ class Developer(commands.Cog):
     async def eval(self, interaction: discord.Interaction, code: str):
         try:
             result = eval(code)
-            await interaction.response.send_message(f"Result: {result}", ephemeral=True)
+            embed = discord.Embed(
+                title="Evaluation Result",
+                description=f"Result: {result}",
+                color=discord.Color(0x013a93)
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
         except Exception as e:
-            await interaction.response.send_message(f"Error: {e}", ephemeral=True)
+            embed = discord.Embed(
+                title="Error",
+                description=f"An error occurred: {e}",
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="sudo", description="Execute commands as another user.")
     @is_bot_developer()
@@ -26,7 +38,12 @@ class Developer(commands.Cog):
     @app_commands.command(name="reload", description="Reloads the bot for maintenance or updates.")
     @is_bot_developer()
     async def reload_command(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Reloading bot...", ephemeral=True)
+        embed = discord.Embed(
+            title="Reloading Bot",
+            description="The bot is reloading, please wait...",
+            color=discord.Color(0x013a93)
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
         os.execv(sys.executable, ['python'] + sys.argv)
 
     @app_commands.command(name="kick-user", description="Kick a user from all servers (excluding appeals server).")
@@ -39,8 +56,19 @@ class Developer(commands.Cog):
                     await guild.kick(user)
                     kicked_servers.append(guild.name)
                 except discord.Forbidden:
-                    pass
-        await interaction.response.send_message(f"User {user.mention} kicked from: {', '.join(kicked_servers)}", ephemeral=True)
+                    continue
+        
+        embed = discord.Embed(
+            title="Kick User",
+            description=f"User {user.mention} has been kicked from the following servers:",
+            color=discord.Color(0x013a93)
+        )
+        if kicked_servers:
+            embed.add_field(name="Kicked From", value=", ".join(kicked_servers), inline=False)
+        else:
+            embed.add_field(name="Error", value="User could not be kicked from any server.", inline=False)
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="say", description="Make the bot say something in a specified channel.")
     @is_bot_developer()
@@ -49,7 +77,12 @@ class Developer(commands.Cog):
             channel = interaction.channel  # Use current channel if none specified
 
         await channel.send(message)
-        await interaction.response.send_message("Message sent!", ephemeral=True)
+        embed = discord.Embed(
+            title="Message Sent",
+            description=f"Message has been sent to {channel.mention}.",
+            color=discord.Color(0x013a93)
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="embed-say", description="Make the bot say something in an embed format.")
     @is_bot_developer()
@@ -62,7 +95,12 @@ class Developer(commands.Cog):
             color=0x013a93  # Standard color for embeds
         )
         await channel.send(embed=embed)
-        await interaction.response.send_message("Embed sent!", ephemeral=True)
+        embed_response = discord.Embed(
+            title="Embed Sent",
+            description=f"Embed has been sent to {channel.mention}.",
+            color=discord.Color(0x013a93)
+        )
+        await interaction.response.send_message(embed=embed_response, ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Developer(bot))

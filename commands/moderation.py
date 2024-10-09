@@ -27,7 +27,12 @@ class Moderation(commands.Cog):
             embed.set_thumbnail(url="https://media.discordapp.net/attachments/689530498837381210/1281538937021661254/image.png")
             await interaction.response.send_message(embed=embed)
         else:
-            await interaction.response.send_message(f"{user.mention} is not blacklisted.", ephemeral=True)
+            embed = discord.Embed(
+                title="Blacklist Status",
+                description=f"{user.mention} is not blacklisted.",
+                color=discord.Color.green()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="lookup-user", description="Lookup a user and show their roles in shared servers.")
     @is_moderation_or_admin()
@@ -46,16 +51,31 @@ class Moderation(commands.Cog):
             )
             await interaction.response.send_message(embed=embed)
         else:
-            await interaction.response.send_message(f"{user.mention} is not in any shared servers.", ephemeral=True)
+            embed = discord.Embed(
+                title="Lookup User",
+                description=f"{user.mention} is not in any shared servers.",
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="edit-reason", description="Edit the reason for a blacklist case.")
     @app_commands.check(is_moderation_or_admin)  # Check for moderation or admin roles
     async def edit_reason(self, interaction: discord.Interaction, case_id: int, new_reason: str):
         success = edit_blacklist_reason(case_id, new_reason)  # Ensure this function updates the reason in the database
         if success:
-            await interaction.response.send_message(f"Successfully updated reason for case ID: {case_id}", ephemeral=True)
+            embed = discord.Embed(
+                title="Edit Reason",
+                description=f"Successfully updated reason for case ID: {case_id}",
+                color=discord.Color.green()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
-            await interaction.response.send_message(f"Failed to update reason for case ID: {case_id}.", ephemeral=True)
+            embed = discord.Embed(
+                title="Edit Reason",
+                description=f"Failed to update reason for case ID: {case_id}.",
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Moderation(bot))

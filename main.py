@@ -35,6 +35,7 @@ async def send_log(message: str):
 # Load command extensions asynchronously
 async def load_extensions():
     try:
+        await bot.load_extension('commands.general')
         await bot.load_extension('commands.moderation')
         await bot.load_extension('commands.admin')
         await bot.load_extension('commands.developer')
