@@ -25,13 +25,13 @@ class Developer(commands.Cog):
         fake_ctx.author = user
         await self.bot.process_commands(fake_ctx)
 
-    @app_commands.command(name="reload", description="Reloads the bot for maintenance or updates.")
+    @app_commands.command(name="reload", description="Reload the bot for maintenance or updates.")
     @is_bot_developer()
     async def reload_command(self, interaction: discord.Interaction):
         await interaction.response.send_message("Reloading bot...", ephemeral=True)
         os.execv(sys.executable, ['python'] + sys.argv)
 
-    @app_commands.command(name="kick user", description="Kick a user from all servers (excluding appeals server).")
+    @app_commands.command(name="kick-user", description="Kick a user from all servers (excluding appeals server).")
     @is_bot_developer()
     async def kick_user(self, interaction: discord.Interaction, user: discord.User):
         kicked_servers = []
