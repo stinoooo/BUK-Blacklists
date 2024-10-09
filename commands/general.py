@@ -1,7 +1,6 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from utils.checks import is_moderation_or_admin
 
 # Define or import the role IDs at the top of your file
 MOD_TEAM_1 = 1236358475827904664  # Replace with actual ID
@@ -88,13 +87,31 @@ class General(commands.Cog):
 
         # Check user's roles and add relevant commands to the embed
         if any(role.id in [MOD_TEAM_1, MOD_TEAM_2] for role in interaction.user.roles):
-            embed.add_field(name="Moderation Commands", value="\n".join([f"{cmd['name']} - {cmd['description']}" for cmd in commands_list["Moderation Commands"]]), inline=False)
+            embed.add_field(
+                name="Moderation Commands",
+                value="\n".join(
+                    [f"[{cmd['name']}]({cmd['name']}) - {cmd['description']}" for cmd in commands_list["Moderation Commands"]]
+                ),
+                inline=False
+            )
 
         if any(role.id in [ADMIN_TEAM_1, ADMIN_TEAM_2] for role in interaction.user.roles):
-            embed.add_field(name="Admin Commands", value="\n".join([f"{cmd['name']} - {cmd['description']}" for cmd in commands_list["Admin Commands"]]), inline=False)
+            embed.add_field(
+                name="Admin Commands",
+                value="\n".join(
+                    [f"[{cmd['name']}]({cmd['name']}) - {cmd['description']}" for cmd in commands_list["Admin Commands"]]
+                ),
+                inline=False
+            )
 
         if interaction.user.id == DEV_USER_ID:  # Assuming DEV_USER_ID is defined elsewhere
-            embed.add_field(name="Bot Developer Commands", value="\n".join([f"{cmd['name']} - {cmd['description']}" for cmd in commands_list["Bot Developer Commands"]]), inline=False)
+            embed.add_field(
+                name="Bot Developer Commands",
+                value="\n".join(
+                    [f"[{cmd['name']}]({cmd['name']}) - {cmd['description']}" for cmd in commands_list["Bot Developer Commands"]]
+                ),
+                inline=False
+            )
 
         await interaction.response.send_message(embed=embed)
 
