@@ -23,7 +23,7 @@ MAIN_GUILD_ID = 1225923654207016961
 # Load command extensions asynchronously
 async def load_extensions():
     await bot.load_extension('commands.moderation')
-    await bot.load_extension('commands.admin')
+    await bot.load_extension('commands.admin')  # Ensure this includes the invite_link
     await bot.load_extension('commands.developer')
 
 @bot.event
@@ -76,25 +76,6 @@ async def on_message(message):
         
         # Send the embed and button as a response
         await message.channel.send(embed=embed, view=view)
-
-@bot.tree.command(name="invite_link", description="Create an invite link for a server.")
-async def invite_link(interaction: discord.Interaction):
-    # Create a dropdown menu for server selection
-    guilds = bot.guilds  # Include all servers the bot is in
-    options = [discord.SelectOption(label=guild.name, value=str(guild.id)) for guild in guilds]
-
-    select = discord.ui.Select(placeholder="Select a server to create an invite link", options=options)
-
-    async def select_callback(interaction: discord.Interaction):
-        selected_guild = bot.get_guild(int(select.values[0]))
-        invite = await selected_guild.text_channels[0].create_invite(max_age=3600)  # 1-hour invite
-        await interaction.response.send_message(f"Invite link for {selected_guild.name}: [Click Here]({invite})", ephemeral=True)
-
-    select.callback = select_callback
-    view = discord.ui.View()
-    view.add_item(select)
-    
-    await interaction.response.send_message("Select a server to create an invite link:", view=view)
 
 # Main entry point
 async def main():

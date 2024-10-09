@@ -88,6 +88,7 @@ class Admin(commands.Cog):
         view.add_item(select)
         await interaction.response.send_message("Please select a server to ban from:", view=view)
 
+   
     @app_commands.command(name="invite_link", description="Create an invite link for a server.")
     @is_admin_team()
     async def invite_link(self, interaction: discord.Interaction):
