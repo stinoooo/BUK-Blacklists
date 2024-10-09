@@ -45,20 +45,15 @@ class Developer(commands.Cog):
     @app_commands.command(name="say", description="Make the bot say something in a specified channel.")
     @is_bot_developer()
     async def say(self, interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
-        # Delete the original command message
-        await interaction.delete_original_response()
-
         if channel is None:
             channel = interaction.channel  # Use current channel if none specified
 
         await channel.send(message)
+        await interaction.response.send_message("Message sent!", ephemeral=True)
 
     @app_commands.command(name="embed-say", description="Make the bot say something in an embed format.")
     @is_bot_developer()
     async def embed_say(self, interaction: discord.Interaction, message: str, channel: discord.TextChannel = None):
-        # Delete the original command message
-        await interaction.delete_original_response()
-
         if channel is None:
             channel = interaction.channel  # Use current channel if none specified
 
@@ -67,6 +62,7 @@ class Developer(commands.Cog):
             color=0x013a93  # Standard color for embeds
         )
         await channel.send(embed=embed)
+        await interaction.response.send_message("Embed sent!", ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Developer(bot))
