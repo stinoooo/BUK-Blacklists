@@ -104,12 +104,12 @@ class General(commands.Cog):
             ],
         }
 
- # Check user's roles and add relevant commands to the embed
+        # Check user's roles and add relevant commands to the embed
         if any(role.id in [MOD_TEAM_1, MOD_TEAM_2, DEV_USER_ID] for role in interaction.user.roles):
             embed.add_field(
                 name="Moderation Team Commands",
                 value="\n".join(
-                    [f"{cmd['name']} - {cmd['description']}" for cmd in commands_list["Moderation Commands"]]
+                    [f"{cmd['name']} - {cmd['description']}" for cmd in commands_list["Moderation Team Commands"]]
                 ),
                 inline=False
             )
@@ -118,7 +118,7 @@ class General(commands.Cog):
             embed.add_field(
                 name="Administration Team Commands",
                 value="\n".join(
-                    [f"{cmd['name']} - {cmd['description']}" for cmd in commands_list["Admin Commands"]]
+                    [f"{cmd['name']} - {cmd['description']}" for cmd in commands_list["Administration Team Commands"]]
                 ),
                 inline=False
             )
