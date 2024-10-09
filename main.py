@@ -23,7 +23,7 @@ MAIN_GUILD_ID = 1225923654207016961
 # Load command extensions asynchronously
 async def load_extensions():
     await bot.load_extension('commands.moderation')
-    await bot.load_extension('commands.admin')  # Ensure this includes the invite_link
+    await bot.load_extension('commands.admin')  # Ensure this includes the invite link
     await bot.load_extension('commands.developer')
 
 @bot.event
