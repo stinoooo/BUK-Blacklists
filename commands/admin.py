@@ -1,9 +1,9 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from bot.utils.checks import is_admin_team
-from bot.utils.database import blacklist_user, unblacklist_user
-from bot.utils.logging import log_blacklist_action
+from utils.checks import is_admin_team
+from utils.database import blacklist_user, unblacklist_user
+from utils.logging import log_blacklist_action
 
 class Admin(commands.Cog):
     def __init__(self, bot):

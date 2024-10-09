@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from bot.utils.checks import is_bot_developer
+from utils.checks import is_bot_developer
 
 class Developer(commands.Cog):
     def __init__(self, bot):

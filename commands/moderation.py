@@ -1,8 +1,8 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from bot.utils.checks import is_moderation_team
-from bot.utils.database import fetch_blacklist_status
+from utils.checks import is_moderation_team
+from utils.database import fetch_blacklist_status
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
