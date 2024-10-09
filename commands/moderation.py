@@ -30,7 +30,7 @@ class Moderation(commands.Cog):
             await interaction.response.send_message(f"{user.mention} is not blacklisted.", ephemeral=True)
 
     @app_commands.command(name="lookup-user", description="Lookup a user and show their roles in shared servers.")
-    @app_commands.check(is_moderation_or_admin)  # Check for moderation or admin roles
+    @is_moderation_or_admin()
     async def lookup_user(self, interaction: discord.Interaction, user: discord.User):
         servers_info = []
         for guild in self.bot.guilds:

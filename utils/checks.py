@@ -50,3 +50,4 @@ def is_moderation_or_admin():
                     ADMIN_TEAM_2 in [role.id for role in interaction.user.roles])
         return False
     return app_commands.check(predicate)
+

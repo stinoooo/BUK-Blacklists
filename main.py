@@ -3,9 +3,14 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import os
 import asyncio
+import logging
 
 # Load environment variables from .env
 load_dotenv()
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Setup intents
 intents = discord.Intents.default()
@@ -16,28 +21,41 @@ intents.message_content = True  # Required for reading message content if necess
 # Setup bot
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Logging channel and guild IDs
-LOG_CHANNEL_ID = 1258619437683183707
-MAIN_GUILD_ID = 1225923654207016961
+# Logging channel ID
+LOG_CHANNEL_ID = 1293589581643386881
+
+async def send_log(message: str):
+    """Sends log messages to the specified log channel."""
+    log_channel = bot.get_channel(LOG_CHANNEL_ID)
+    if log_channel:
+        await log_channel.send(message)
+    else:
+        logger.error("Log channel not found.")
 
 # Load command extensions asynchronously
 async def load_extensions():
-    await bot.load_extension('commands.moderation')
-    await bot.load_extension('commands.admin')  # Ensure this includes the invite link
-    await bot.load_extension('commands.developer')
+    try:
+        await bot.load_extension('commands.moderation')
+        await bot.load_extension('commands.admin')
+        await bot.load_extension('commands.developer')
+        logger.info("Extensions loaded successfully.")
+    except Exception as e:
+        await send_log(f"Failed to load extensions: {e}")
+        logger.error(f"Failed to load extensions: {e}")
 
 @bot.event
 async def on_ready():
-    print(f'{bot.user} is online!')
+    logger.info(f'{bot.user} is online!')
     await bot.change_presence(activity=discord.Game(name="Managing Blacklists"))
 
     # Sync globally
     synced_commands = await bot.tree.sync()
-    print(f"Global slash commands synced: {len(synced_commands)} commands available.")
+    logger.info(f"Global slash commands synced: {len(synced_commands)} commands available.")
 
 @bot.event
 async def on_guild_join(guild):
     # Log information when the bot joins a new guild
+    logger.info(f"Joined guild: {guild.name} (ID: {guild.id})")
     permissions = guild.me.guild_permissions
     invite_link = await guild.text_channels[0].create_invite(max_age=3600)  # 1-hour invite link
 
@@ -50,8 +68,7 @@ async def on_guild_join(guild):
     embed.add_field(name="Permissions", value=", ".join([perm for perm, value in permissions if value]), inline=False)
     embed.add_field(name="Invite Link", value=f"[Click Here]({invite_link})", inline=False)
     
-    log_channel = bot.get_channel(LOG_CHANNEL_ID)
-    await log_channel.send(embed=embed)
+    await send_log(embed)
 
 @bot.event
 async def on_message(message):
@@ -61,7 +78,6 @@ async def on_message(message):
     
     # Check if it's a DM
     if isinstance(message.channel, discord.DMChannel):
-        # Create an embed
         embed = discord.Embed(
             title="Direct Messages Not Supported",
             description="We are unable to respond to direct messages sent to this bot. If you need assistance or wish to contact the BUK Moderation Team, "
@@ -76,6 +92,24 @@ async def on_message(message):
         
         # Send the embed and button as a response
         await message.channel.send(embed=embed, view=view)
+
+@bot.event
+async def on_command(ctx):
+    """Logs the usage of commands."""
+    logger.info(f"Command used: {ctx.command} by {ctx.author} in {ctx.channel}")
+    await send_log(f"Command used: **{ctx.command}** by **{ctx.author}** in **{ctx.channel}**.")
+
+@bot.event
+async def on_command_error(ctx, error):
+    """Logs errors related to commands."""
+    logger.error(f"Error in command {ctx.command}: {error}")
+    await send_log(f"Error in command **{ctx.command}**: {error}")
+
+@bot.event
+async def on_error(event, *args, **kwargs):
+    """Logs errors that occur outside of commands."""
+    logger.error(f"An error occurred in event {event}: {args}, {kwargs}")
+    await send_log(f"An error occurred in event **{event}**: {args}, {kwargs}")
 
 # Main entry point
 async def main():
